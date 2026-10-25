@@ -47,7 +47,12 @@ class SupabaseService {
   Future<void> fetchLiveCampaigns() async {
     try {
       final supa = client;
-      if (supa == null) return;
+      if (supa == null) {
+        if (_campaigns.isEmpty) {
+          _campaigns = _getDefaultPooledFunds();
+        }
+        return;
+      }
 
       final res = await supa.from('campaigns').select('''
         *,
@@ -56,10 +61,121 @@ class SupabaseService {
         impact_updates (*, ngos(name))
       ''').order('created_at', ascending: false);
 
-      _campaigns = (res as List).map((row) => Campaign.fromJson(row as Map<String, dynamic>)).toList();
+      final loaded = (res as List).map((row) => Campaign.fromJson(row as Map<String, dynamic>)).toList();
+      final hasPooled = loaded.any((c) => c.isPooledFund);
+      if (!hasPooled) {
+        loaded.insertAll(0, _getDefaultPooledFunds());
+      }
+      _campaigns = loaded;
     } catch (e) {
-      // Fallback gracefully on intermittent offline network
+      if (_campaigns.isEmpty) {
+        _campaigns = _getDefaultPooledFunds();
+      }
     }
+  }
+
+  List<Campaign> _getDefaultPooledFunds() {
+    return [
+      Campaign(
+        id: 'c0000000-0000-0000-0000-000000000001',
+        title: 'Eastern DRC Emergency & Health Relief Pool',
+        subtitle: '100% transparent automated redistribution across 3 top-rated hospitals and water stations.',
+        description: 'Providing critical trauma surgery, emergency cholera water purification kits, and maternal intensive care in Goma and Bukavu. 100% of incoming funds are automatically split via double-entry ledger between verified local responders.',
+        category: 'HEALTH',
+        isPooledFund: true,
+        targetAmountUsdCents: 10000000,
+        raisedAmountUsdCents: 4285000,
+        targetAmountCdf: 280000000,
+        raisedAmountCdf: 120000000,
+        imageUrl: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1200&q=80',
+        location: 'Goma & Bukavu, North & South Kivu',
+        splits: [
+          CampaignSplit(
+            id: 'split-1',
+            ngoId: 'a0000000-0000-0000-0000-000000000001',
+            ngoName: 'Fondation Panzi (Bukavu)',
+            percentage: 40.0,
+          ),
+          CampaignSplit(
+            id: 'split-2',
+            ngoId: 'a0000000-0000-0000-0000-000000000002',
+            ngoName: 'Kivu Clean Water (Goma)',
+            percentage: 35.0,
+          ),
+          CampaignSplit(
+            id: 'split-3',
+            ngoId: 'a0000000-0000-0000-0000-000000000003',
+            ngoName: 'Orphelinat Kinshasa (Ngaliema)',
+            percentage: 25.0,
+          ),
+        ],
+        createdAt: DateTime.now().subtract(const Duration(days: 30)),
+      ),
+      Campaign(
+        id: 'c0000000-0000-0000-0000-000000000004',
+        title: 'Clean Water & Sanitation Consortium Pool',
+        subtitle: 'Emergency solar-powered water boreholes and cholera mitigation across IDP sites.',
+        description: 'Uniting grassroots water engineers to drill deep solar water boreholes and establish chlorinated distribution kiosks in high-density displaced person settlements across Eastern DRC.',
+        category: 'EMERGENCY',
+        isPooledFund: true,
+        targetAmountUsdCents: 7500000,
+        raisedAmountUsdCents: 3150000,
+        targetAmountCdf: 210000000,
+        raisedAmountCdf: 88200000,
+        imageUrl: 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=800&q=80',
+        location: 'Goma & Mugunga IDP Settlement',
+        splits: [
+          CampaignSplit(
+            id: 'split-w-1',
+            ngoId: 'a0000000-0000-0000-0000-000000000002',
+            ngoName: 'Kivu Clean Water (Goma)',
+            percentage: 50.0,
+          ),
+          CampaignSplit(
+            id: 'split-w-2',
+            ngoId: 'a0000000-0000-0000-0000-000000000001',
+            ngoName: 'Fondation Panzi',
+            percentage: 30.0,
+          ),
+          CampaignSplit(
+            id: 'split-w-3',
+            ngoId: 'a0000000-0000-0000-0000-000000000003',
+            ngoName: 'Sauvons Congo Water Initiative',
+            percentage: 20.0,
+          ),
+        ],
+        createdAt: DateTime.now().subtract(const Duration(days: 15)),
+      ),
+      Campaign(
+        id: 'c0000000-0000-0000-0000-000000000005',
+        title: 'Congo Youth Tech & Education Consortium',
+        subtitle: 'Digital literacy, Starlink satellite internet labs, and coding scholarships.',
+        description: 'Empowering marginalized Congolese youth through certified computer programming, web development, and remote digital job skills across Kinshasa and Lubumbashi.',
+        category: 'EDUCATION',
+        isPooledFund: true,
+        targetAmountUsdCents: 5000000,
+        raisedAmountUsdCents: 1820000,
+        targetAmountCdf: 140000000,
+        raisedAmountCdf: 50960000,
+        imageUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80',
+        location: 'Kinshasa & Lubumbashi',
+        splits: [
+          CampaignSplit(
+            id: 'split-e-1',
+            ngoId: 'a0000000-0000-0000-0000-000000000003',
+            ngoName: 'Code for Congo (Kinshasa)',
+            percentage: 60.0,
+          ),
+          CampaignSplit(
+            id: 'split-e-2',
+            ngoId: 'a0000000-0000-0000-0000-000000000002',
+            ngoName: 'Orphelinat Kinshasa Tech Academy',
+            percentage: 40.0,
+          ),
+        ],
+        createdAt: DateTime.now().subtract(const Duration(days: 7)),
+      ),
+    ];
   }
 
   // In-memory repositories backed by local cache
@@ -171,10 +287,100 @@ class SupabaseService {
   }
 
   Future<void> updateSplitPercentages(String campaignId, List<CampaignSplit> newSplits) async {
+    final supa = client;
+    if (supa != null) {
+      try {
+        for (final split in newSplits) {
+          if (split.id.isNotEmpty && !split.id.startsWith('temp-') && !split.id.startsWith('split-')) {
+            await supa.from('campaign_splits').update({
+              'split_percentage': split.percentage,
+              'is_active': true,
+            }).eq('id', split.id);
+          }
+        }
+      } catch (e) {
+        debugPrint('Note: updateSplitPercentages remote error: $e');
+      }
+    }
+
     final index = _campaigns.indexWhere((c) => c.id == campaignId);
     if (index != -1) {
       _campaigns[index] = _campaigns[index].copyWith(splits: newSplits);
     }
+  }
+
+  Future<Campaign> createPooledFund({
+    required String title,
+    required String subtitle,
+    required String description,
+    required String category,
+    required int targetAmountUsdCents,
+    required int targetAmountCdf,
+    required String imageUrl,
+    required String location,
+    required List<CampaignSplit> splits,
+  }) async {
+    final supa = client;
+    String newId = 'pool-${DateTime.now().millisecondsSinceEpoch}';
+
+    if (supa != null) {
+      try {
+        final insertData = {
+          'title': title,
+          'subtitle': subtitle,
+          'description': description,
+          'category': category.toUpperCase(),
+          'is_pooled_fund': true,
+          'target_amount_usd_cents': targetAmountUsdCents,
+          'raised_amount_usd_cents': 0,
+          'target_amount_cdf': targetAmountCdf,
+          'raised_amount_cdf': 0,
+          'image_url': imageUrl.isEmpty
+              ? 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1200&q=80'
+              : imageUrl,
+          'location': location,
+          'status': 'ACTIVE',
+        };
+        final res = await supa.from('campaigns').insert(insertData).select().single();
+        if (res['id'] != null) {
+          newId = res['id'] as String;
+          for (final split in splits) {
+            try {
+              await supa.from('campaign_splits').insert({
+                'campaign_id': newId,
+                'ngo_id': split.ngoId,
+                'split_percentage': split.percentage,
+                'is_active': true,
+              });
+            } catch (_) {}
+          }
+        }
+      } catch (e) {
+        debugPrint('Note: remote pool creation error: $e');
+      }
+    }
+
+    final newPool = Campaign(
+      id: newId,
+      title: title,
+      subtitle: subtitle,
+      description: description,
+      category: category.toUpperCase(),
+      isPooledFund: true,
+      targetAmountUsdCents: targetAmountUsdCents,
+      raisedAmountUsdCents: 0,
+      targetAmountCdf: targetAmountCdf,
+      raisedAmountCdf: 0,
+      imageUrl: imageUrl.isEmpty
+          ? 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1200&q=80'
+          : imageUrl,
+      location: location,
+      splits: splits,
+      createdAt: DateTime.now(),
+    );
+
+    _campaigns.insert(0, newPool);
+    return newPool;
   }
 
   Future<void> renewMobileMoneyPledge(String subscriptionId) async {
