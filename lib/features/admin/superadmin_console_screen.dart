@@ -27,6 +27,9 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
   final PageController _pendingCarouselController = PageController(viewportFraction: 0.92);
   int _currentPendingPage = 0;
 
+  final PageController _poolCarouselController = PageController(viewportFraction: 0.92);
+  int _currentPoolPage = 0;
+
   @override
   void initState() {
     super.initState();
@@ -36,6 +39,7 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
   @override
   void dispose() {
     _pendingCarouselController.dispose();
+    _poolCarouselController.dispose();
     super.dispose();
   }
 
@@ -48,6 +52,7 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
       final pendingCount = ngos.where((n) => n.verificationStatus != 'VERIFIED').length;
       final allCampaigns = SupabaseService.instance.campaigns;
       final pools = allCampaigns.where((c) => c.isPooledFund).toList();
+      final displayPoolCount = pools.take(5).length;
 
       setState(() {
         _ngos = ngos;
@@ -59,6 +64,11 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
           _currentPendingPage = pendingCount - 1;
         } else if (pendingCount == 0) {
           _currentPendingPage = 0;
+        }
+        if (_currentPoolPage >= displayPoolCount && displayPoolCount > 0) {
+          _currentPoolPage = displayPoolCount - 1;
+        } else if (displayPoolCount == 0) {
+          _currentPoolPage = 0;
         }
         _isLoading = false;
       });
@@ -570,9 +580,11 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             visualDensity: VisualDensity.compact,
                           ),
-                          icon: const Icon(Icons.add_circle_outline_rounded, size: 16),
-                          label: const Text('Create Pool', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-                          onPressed: _showCreatePoolDialog,
+                          icon: const Icon(Icons.arrow_forward_rounded, size: 14),
+                          label: const Text('View All', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+                          onPressed: () {
+                            context.push('/admin/pools').then((_) => _loadAdminData());
+                          },
                         ),
                       ],
                     ),
@@ -615,13 +627,65 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                               ),
                               icon: const Icon(Icons.add_rounded, size: 16),
                               label: const Text('Create First Pool', style: TextStyle(fontWeight: FontWeight.w700)),
-                              onPressed: _showCreatePoolDialog,
+                              onPressed: () {
+                                context.push('/admin/pools').then((_) => _loadAdminData());
+                              },
                             ),
                           ],
                         ),
                       )
-                    else
-                      ..._pooledFunds.map((pool) => _buildPoolCard(pool, currency)),
+                    else ...[
+                      Builder(
+                        builder: (context) {
+                          final displayPools = _pooledFunds.take(5).toList();
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                height: 275,
+                                child: PageView.builder(
+                                  controller: _poolCarouselController,
+                                  itemCount: displayPools.length,
+                                  onPageChanged: (index) {
+                                    setState(() => _currentPoolPage = index);
+                                  },
+                                  itemBuilder: (context, index) {
+                                    final pool = displayPools[index];
+                                    return _buildPoolCarouselCard(pool, currency);
+                                  },
+                                ),
+                              ),
+                              if (displayPools.length > 1) ...[
+                                const SizedBox(height: 10),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: List.generate(displayPools.length, (index) {
+                                    final isActive = index == _currentPoolPage;
+                                    return GestureDetector(
+                                      onTap: () => _poolCarouselController.animateToPage(
+                                        index,
+                                        duration: const Duration(milliseconds: 300),
+                                        curve: Curves.easeInOut,
+                                      ),
+                                      child: AnimatedContainer(
+                                        duration: const Duration(milliseconds: 250),
+                                        margin: const EdgeInsets.symmetric(horizontal: 3),
+                                        width: isActive ? 22 : 6,
+                                        height: 6,
+                                        decoration: BoxDecoration(
+                                          color: isActive ? AppTheme.ceruleanBlue : AppTheme.cardOutline,
+                                          borderRadius: BorderRadius.circular(3),
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                                ),
+                              ],
+                            ],
+                          );
+                        },
+                      ),
+                    ],
 
                     const SizedBox(height: 36),
                   ],
@@ -631,7 +695,7 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
     );
   }
 
-  Widget _buildPoolCard(Campaign pool, AppCurrency currency) {
+  Widget _buildPoolCarouselCard(Campaign pool, AppCurrency currency) {
     final raisedStr = CurrencyNotifier.formatAmount(
       amountUsdCents: pool.raisedAmountUsdCents,
       amountCdf: pool.raisedAmountCdf,
@@ -652,8 +716,8 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
         ).then((_) => _loadAdminData());
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 14),
-        padding: const EdgeInsets.all(18),
+        margin: const EdgeInsets.only(right: 12, bottom: 4),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppTheme.surfacePureWhite,
           borderRadius: BorderRadius.circular(20),
@@ -674,7 +738,7 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(9),
                   decoration: const BoxDecoration(
                     color: AppTheme.pastelMint,
                     shape: BoxShape.circle,
@@ -682,10 +746,10 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                   child: const Icon(
                     Icons.hub_rounded,
                     color: AppTheme.mintGreen,
-                    size: 20,
+                    size: 18,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -695,24 +759,26 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                         style: const TextStyle(
                           color: AppTheme.textSlateNavy,
                           fontWeight: FontWeight.w800,
-                          fontSize: 15,
+                          fontSize: 14,
                           height: 1.25,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                             decoration: BoxDecoration(
                               color: AppTheme.backgroundIceBlue,
-                              borderRadius: BorderRadius.circular(6),
+                              borderRadius: BorderRadius.circular(5),
                             ),
                             child: Text(
                               pool.category.toUpperCase(),
                               style: const TextStyle(
                                 color: AppTheme.ceruleanBlue,
-                                fontSize: 10,
+                                fontSize: 9.5,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
@@ -731,28 +797,28 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                   ),
                 ),
                 const SizedBox(width: 6),
-                const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppTheme.textMutedGray),
+                const Icon(Icons.arrow_forward_ios_rounded, size: 13, color: AppTheme.textMutedGray),
               ],
             ),
 
             if (pool.subtitle.isNotEmpty) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               Text(
                 pool.subtitle,
-                style: const TextStyle(color: AppTheme.textMutedGray, fontSize: 12, height: 1.35),
+                style: const TextStyle(color: AppTheme.textMutedGray, fontSize: 11.5, height: 1.3),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
             ],
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
             // Participating Campaigns Summary Box
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: AppTheme.backgroundIceBlue,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -762,13 +828,13 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.groups_rounded, size: 14, color: AppTheme.ceruleanBlue),
-                          const SizedBox(width: 6),
+                          const Icon(Icons.groups_rounded, size: 13, color: AppTheme.ceruleanBlue),
+                          const SizedBox(width: 5),
                           Text(
-                            '${pool.splits.length} Participating Campaigns / NGOs',
+                            '${pool.splits.length} Participating Beneficiaries',
                             style: const TextStyle(
                               color: AppTheme.textSlateNavy,
-                              fontSize: 11,
+                              fontSize: 10.5,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -776,27 +842,27 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                       ),
                       Text(
                         'Formula Split',
-                        style: const TextStyle(color: AppTheme.textMutedGray, fontSize: 10, fontWeight: FontWeight.w600),
+                        style: const TextStyle(color: AppTheme.textMutedGray, fontSize: 9.5, fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   Wrap(
-                    spacing: 6,
-                    runSpacing: 4,
+                    spacing: 5,
+                    runSpacing: 3,
                     children: pool.splits.map((s) {
                       return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                         decoration: BoxDecoration(
                           color: AppTheme.surfacePureWhite,
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(5),
                           border: Border.all(color: AppTheme.cardOutline),
                         ),
                         child: Text(
                           '${s.ngoName} (${s.percentage.toInt()}%)',
                           style: const TextStyle(
                             color: AppTheme.textSlateNavy,
-                            fontSize: 10,
+                            fontSize: 9.5,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -807,7 +873,7 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
             // Progress Bar & Financials
             Row(
@@ -818,286 +884,50 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                   style: const TextStyle(
                     color: AppTheme.textSlateNavy,
                     fontWeight: FontWeight.w800,
-                    fontSize: 13,
+                    fontSize: 12.5,
                   ),
                 ),
                 Text(
                   'Goal: $targetStr',
-                  style: const TextStyle(color: AppTheme.textMutedGray, fontSize: 12),
+                  style: const TextStyle(color: AppTheme.textMutedGray, fontSize: 11.5),
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 5),
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
                 value: progress,
                 backgroundColor: AppTheme.cardOutline,
                 valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.ceruleanBlue),
-                minHeight: 6,
+                minHeight: 5,
               ),
             ),
 
-            const SizedBox(height: 12),
+            const Spacer(),
             const Divider(color: AppTheme.cardOutline, height: 1),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
 
             // Bottom Tap Prompt
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: const [
                 Text(
-                  'Open Pool & Adjust Redistribution Sliders',
+                  'Manage Pool & Sliders',
                   style: TextStyle(
                     color: AppTheme.ceruleanBlue,
-                    fontSize: 12,
+                    fontSize: 11.5,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 SizedBox(width: 4),
-                Icon(Icons.arrow_forward_rounded, size: 14, color: AppTheme.ceruleanBlue),
+                Icon(Icons.arrow_forward_rounded, size: 13, color: AppTheme.ceruleanBlue),
               ],
             ),
           ],
         ),
       ),
     );
-  }
-
-  Future<void> _showCreatePoolDialog() async {
-    final titleController = TextEditingController();
-    final subtitleController = TextEditingController();
-    final descController = TextEditingController();
-    final targetController = TextEditingController(text: '50000');
-    final locationController = TextEditingController(text: 'Eastern DRC (Goma & Bukavu)');
-    String selectedCategory = 'HEALTH';
-
-    final confirmed = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setModalState) => Container(
-          decoration: const BoxDecoration(
-            color: AppTheme.surfacePureWhite,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-          ),
-          padding: EdgeInsets.only(
-            top: 20,
-            left: 20,
-            right: 20,
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: AppTheme.cardOutline,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: const [
-                    Icon(Icons.add_circle_outline_rounded, color: AppTheme.ceruleanBlue, size: 22),
-                    SizedBox(width: 8),
-                    Text(
-                      'Create Multi-Partner Pool',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppTheme.textSlateNavy),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Launch a collective fund that redistributes capital across multiple verified NGOs.',
-                  style: TextStyle(fontSize: 12, color: AppTheme.textMutedGray),
-                ),
-                const SizedBox(height: 16),
-
-                // Pool Title
-                const Text('Pool Name / Title', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                const SizedBox(height: 4),
-                TextField(
-                  controller: titleController,
-                  decoration: InputDecoration(
-                    hintText: 'e.g. South Kivu Maternal & Child Health Pool',
-                    filled: true,
-                    fillColor: AppTheme.backgroundIceBlue,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppTheme.cardOutline)),
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // Subtitle
-                const Text('Short Summary', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                const SizedBox(height: 4),
-                TextField(
-                  controller: subtitleController,
-                  decoration: InputDecoration(
-                    hintText: 'e.g. Automated split across 3 regional maternity clinics.',
-                    filled: true,
-                    fillColor: AppTheme.backgroundIceBlue,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppTheme.cardOutline)),
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // Category & Target
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Category', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                          const SizedBox(height: 4),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            decoration: BoxDecoration(
-                              color: AppTheme.backgroundIceBlue,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: AppTheme.cardOutline),
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                value: selectedCategory,
-                                isExpanded: true,
-                                items: const [
-                                  DropdownMenuItem(value: 'HEALTH', child: Text('Health')),
-                                  DropdownMenuItem(value: 'EMERGENCY', child: Text('Emergency')),
-                                  DropdownMenuItem(value: 'EDUCATION', child: Text('Education')),
-                                  DropdownMenuItem(value: 'WATER', child: Text('Water & Sanitation')),
-                                  DropdownMenuItem(value: 'CHILDREN', child: Text('Children')),
-                                ],
-                                onChanged: (val) {
-                                  if (val != null) setModalState(() => selectedCategory = val);
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Target Goal (USD)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                          const SizedBox(height: 4),
-                          TextField(
-                            controller: targetController,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              hintText: '50000',
-                              prefixText: '\$ ',
-                              filled: true,
-                              fillColor: AppTheme.backgroundIceBlue,
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppTheme.cardOutline)),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-
-                // Location
-                const Text('Location', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                const SizedBox(height: 4),
-                TextField(
-                  controller: locationController,
-                  decoration: InputDecoration(
-                    hintText: 'e.g. Bukavu & Uvira, South Kivu',
-                    filled: true,
-                    fillColor: AppTheme.backgroundIceBlue,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppTheme.cardOutline)),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Submit Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.ceruleanBlue,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.pillRadius)),
-                    ),
-                    onPressed: () {
-                      if (titleController.text.trim().isEmpty) return;
-                      Navigator.pop(ctx, true);
-                    },
-                    child: const Text('Create & Launch Pool', style: TextStyle(fontWeight: FontWeight.w700)),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
-    if (confirmed != true) return;
-
-    final targetUsd = int.tryParse(targetController.text.trim()) ?? 50000;
-    final targetUsdCents = targetUsd * 100;
-    final targetCdf = CurrencyNotifier.convertUsdToCdf(targetUsdCents);
-
-    // Initial partner splits from verified NGOs or consortium defaults
-    final verified = _ngos.where((n) => n.verificationStatus == 'VERIFIED').toList();
-    List<CampaignSplit> initialSplits = [];
-    if (verified.length >= 2) {
-      initialSplits = [
-        CampaignSplit(id: 'split-new-1', ngoId: verified[0].id, ngoName: verified[0].name, percentage: 50.0),
-        CampaignSplit(id: 'split-new-2', ngoId: verified[1].id, ngoName: verified[1].name, percentage: 50.0),
-      ];
-    } else {
-      initialSplits = [
-        CampaignSplit(id: 'split-new-1', ngoId: 'a0000000-0000-0000-0000-000000000001', ngoName: 'Fondation Panzi', percentage: 50.0),
-        CampaignSplit(id: 'split-new-2', ngoId: 'a0000000-0000-0000-0000-000000000002', ngoName: 'Sauvons Congo', percentage: 50.0),
-      ];
-    }
-
-    try {
-      await SupabaseService.instance.createPooledFund(
-        title: titleController.text.trim(),
-        subtitle: subtitleController.text.trim().isEmpty ? 'Multi-partner collaborative cause fund.' : subtitleController.text.trim(),
-        description: descController.text.trim().isEmpty ? 'Automated ledger-verified redistribution across partner NGOs.' : descController.text.trim(),
-        category: selectedCategory,
-        targetAmountUsdCents: targetUsdCents,
-        targetAmountCdf: targetCdf,
-        imageUrl: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1200&q=80',
-        location: locationController.text.trim().isEmpty ? 'Democratic Republic of Congo' : locationController.text.trim(),
-        splits: initialSplits,
-      );
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Multi-Partner Pool created successfully!'),
-            backgroundColor: AppTheme.mintGreen,
-          ),
-        );
-        _loadAdminData();
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to create pool: $e')),
-        );
-      }
-    }
   }
 
   Widget _buildMetricTile(String title, IconData icon, Color color, {VoidCallback? onTap}) {

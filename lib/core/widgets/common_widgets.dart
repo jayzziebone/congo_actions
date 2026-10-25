@@ -471,6 +471,13 @@ class AppDrawer extends ConsumerWidget {
                     ),
                     _buildNavTile(
                       context: context,
+                      title: 'Multi-Partner Pools',
+                      subtitle: 'Consortium funds & redistribution models',
+                      icon: Icons.hub_rounded,
+                      route: '/admin/pools',
+                    ),
+                    _buildNavTile(
+                      context: context,
                       title: 'Registered NGOs',
                       subtitle: 'Verified Congolese NGO directory',
                       icon: Icons.verified_user_rounded,

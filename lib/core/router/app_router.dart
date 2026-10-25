@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/admin/multi_partner_pool_detail_screen.dart';
+import '../../features/admin/multi_partner_pools_screen.dart';
 import '../../features/admin/ngo_review_screen.dart';
 import '../../features/admin/registered_ngos_screen.dart';
 import '../../features/admin/superadmin_console_screen.dart';
@@ -129,6 +130,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           final ngo = state.extra as Ngo?;
           return NgoReviewScreen(ngoId: ngoId, initialNgo: ngo);
         },
+      ),
+      GoRoute(
+        path: '/admin/pools',
+        builder: (context, state) => const MultiPartnerPoolsScreen(),
       ),
       GoRoute(
         path: '/admin/pool/:id',
