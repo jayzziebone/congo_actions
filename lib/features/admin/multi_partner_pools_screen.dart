@@ -108,9 +108,11 @@ class _MultiPartnerPoolsScreenState extends ConsumerState<MultiPartnerPoolsScree
                   children: const [
                     Icon(Icons.add_circle_outline_rounded, color: AppTheme.ceruleanBlue, size: 22),
                     SizedBox(width: 8),
-                    Text(
-                      'Create Multi-Partner Pool',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppTheme.textSlateNavy),
+                    Expanded(
+                      child: Text(
+                        'Create Multi-Partner Pool',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppTheme.textSlateNavy),
+                      ),
                     ),
                   ],
                 ),
@@ -358,7 +360,10 @@ class _MultiPartnerPoolsScreenState extends ConsumerState<MultiPartnerPoolsScree
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               Text(
                                 '${_pools.length} Multi-Partner Pools',
@@ -368,7 +373,6 @@ class _MultiPartnerPoolsScreenState extends ConsumerState<MultiPartnerPoolsScree
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
-                              const SizedBox(width: 6),
                               PastelBadge.pooled(),
                             ],
                           ),
@@ -615,23 +619,30 @@ class _MultiPartnerPoolsScreenState extends ConsumerState<MultiPartnerPoolsScree
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.groups_rounded, size: 14, color: AppTheme.ceruleanBlue),
-                          const SizedBox(width: 6),
-                          Text(
-                            '${pool.splits.length} Participating Campaigns / NGOs',
-                            style: const TextStyle(
-                              color: AppTheme.textSlateNavy,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
+                      Flexible(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.groups_rounded, size: 14, color: AppTheme.ceruleanBlue),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                '${pool.splits.length} Participating Campaigns / NGOs',
+                                style: const TextStyle(
+                                  color: AppTheme.textSlateNavy,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                      Text(
+                      const SizedBox(width: 6),
+                      const Text(
                         'Redistribution Split',
-                        style: const TextStyle(color: AppTheme.textMutedGray, fontSize: 10, fontWeight: FontWeight.w600),
+                        style: TextStyle(color: AppTheme.textMutedGray, fontSize: 10, fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
@@ -701,12 +712,15 @@ class _MultiPartnerPoolsScreenState extends ConsumerState<MultiPartnerPoolsScree
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: const [
-                Text(
-                  'Manage Pool & Redistribution Sliders',
-                  style: TextStyle(
-                    color: AppTheme.ceruleanBlue,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
+                Flexible(
+                  child: Text(
+                    'Manage Pool & Redistribution Sliders',
+                    style: TextStyle(
+                      color: AppTheme.ceruleanBlue,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 SizedBox(width: 4),
