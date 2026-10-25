@@ -642,7 +642,7 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               SizedBox(
-                                height: 275,
+                                height: 290,
                                 child: PageView.builder(
                                   controller: _poolCarouselController,
                                   itemCount: displayPools.length,
@@ -717,7 +717,7 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
       },
       child: Container(
         margin: const EdgeInsets.only(right: 12, bottom: 4),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: AppTheme.surfacePureWhite,
           borderRadius: BorderRadius.circular(20),
@@ -738,7 +738,7 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(9),
+                  padding: const EdgeInsets.all(8),
                   decoration: const BoxDecoration(
                     color: AppTheme.pastelMint,
                     shape: BoxShape.circle,
@@ -746,10 +746,10 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                   child: const Icon(
                     Icons.hub_rounded,
                     color: AppTheme.mintGreen,
-                    size: 18,
+                    size: 17,
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 9),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -760,12 +760,12 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                           color: AppTheme.textSlateNavy,
                           fontWeight: FontWeight.w800,
                           fontSize: 14,
-                          height: 1.25,
+                          height: 1.2,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 3),
                       Row(
                         children: [
                           Container(
@@ -797,25 +797,25 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                   ),
                 ),
                 const SizedBox(width: 6),
-                const Icon(Icons.arrow_forward_ios_rounded, size: 13, color: AppTheme.textMutedGray),
+                const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppTheme.textMutedGray),
               ],
             ),
 
             if (pool.subtitle.isNotEmpty) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Text(
                 pool.subtitle,
-                style: const TextStyle(color: AppTheme.textMutedGray, fontSize: 11.5, height: 1.3),
-                maxLines: 2,
+                style: const TextStyle(color: AppTheme.textMutedGray, fontSize: 11, height: 1.25),
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ],
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 7),
 
             // Participating Campaigns Summary Box
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
               decoration: BoxDecoration(
                 color: AppTheme.backgroundIceBlue,
                 borderRadius: BorderRadius.circular(10),
@@ -834,15 +834,15 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                             '${pool.splits.length} Participating Beneficiaries',
                             style: const TextStyle(
                               color: AppTheme.textSlateNavy,
-                              fontSize: 10.5,
+                              fontSize: 10,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],
                       ),
-                      Text(
+                      const Text(
                         'Formula Split',
-                        style: const TextStyle(color: AppTheme.textMutedGray, fontSize: 9.5, fontWeight: FontWeight.w600),
+                        style: TextStyle(color: AppTheme.textMutedGray, fontSize: 9.5, fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
@@ -850,30 +850,49 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                   Wrap(
                     spacing: 5,
                     runSpacing: 3,
-                    children: pool.splits.map((s) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                        decoration: BoxDecoration(
-                          color: AppTheme.surfacePureWhite,
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(color: AppTheme.cardOutline),
-                        ),
-                        child: Text(
-                          '${s.ngoName} (${s.percentage.toInt()}%)',
-                          style: const TextStyle(
-                            color: AppTheme.textSlateNavy,
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w600,
+                    children: [
+                      ...pool.splits.take(3).map((s) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                          decoration: BoxDecoration(
+                            color: AppTheme.surfacePureWhite,
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(color: AppTheme.cardOutline),
+                          ),
+                          child: Text(
+                            '${s.ngoName} (${s.percentage.toInt()}%)',
+                            style: const TextStyle(
+                              color: AppTheme.textSlateNavy,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        );
+                      }),
+                      if (pool.splits.length > 3)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                          decoration: BoxDecoration(
+                            color: AppTheme.surfacePureWhite,
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(color: AppTheme.cardOutline),
+                          ),
+                          child: Text(
+                            '+${pool.splits.length - 3} more',
+                            style: const TextStyle(
+                              color: AppTheme.ceruleanBlue,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
-                      );
-                    }).toList(),
+                    ],
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
 
             // Progress Bar & Financials
             Row(
@@ -884,23 +903,23 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                   style: const TextStyle(
                     color: AppTheme.textSlateNavy,
                     fontWeight: FontWeight.w800,
-                    fontSize: 12.5,
+                    fontSize: 12,
                   ),
                 ),
                 Text(
                   'Goal: $targetStr',
-                  style: const TextStyle(color: AppTheme.textMutedGray, fontSize: 11.5),
+                  style: const TextStyle(color: AppTheme.textMutedGray, fontSize: 11),
                 ),
               ],
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 4),
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
                 value: progress,
                 backgroundColor: AppTheme.cardOutline,
                 valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.ceruleanBlue),
-                minHeight: 5,
+                minHeight: 4,
               ),
             ),
 
