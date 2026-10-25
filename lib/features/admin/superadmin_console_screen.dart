@@ -327,7 +327,7 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                     else ...[
                       // Carousel Slider for Pending Registration NGOs
                       SizedBox(
-                        height: 255,
+                        height: 185,
                         child: PageView.builder(
                           controller: _pendingCarouselController,
                           itemCount: pendingNgos.length,
@@ -344,18 +344,18 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                               },
                               child: Container(
                                 margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
-                                padding: const EdgeInsets.all(18),
+                                padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.backgroundIceBlue,
+                                  color: AppTheme.surfacePureWhite,
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
-                                    color: AppTheme.warmOchre.withOpacity(0.6),
-                                    width: 1.5,
+                                    color: AppTheme.cardOutline,
+                                    width: 1.2,
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.03),
-                                      blurRadius: 8,
+                                      color: Colors.black.withValues(alpha: 0.03),
+                                      blurRadius: 10,
                                       offset: const Offset(0, 3),
                                     ),
                                   ],
@@ -363,6 +363,7 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
+                                    // Header: Icon + Name + Review Required Pill
                                     Row(
                                       children: [
                                         Container(
@@ -386,12 +387,13 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                                                 ngo.name,
                                                 style: const TextStyle(
                                                   color: AppTheme.textSlateNavy,
-                                                  fontWeight: FontWeight.w700,
+                                                  fontWeight: FontWeight.w800,
                                                   fontSize: 15,
                                                 ),
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
+                                              const SizedBox(height: 2),
                                               Text(
                                                 'Reg: ${ngo.legalRegistrationNumber}',
                                                 style: const TextStyle(color: AppTheme.textMutedGray, fontSize: 11),
@@ -401,98 +403,131 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                                             ],
                                           ),
                                         ),
+                                        const SizedBox(width: 6),
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                           decoration: BoxDecoration(
                                             color: AppTheme.pastelButtercream,
                                             borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                                           ),
-                                          child: const Text(
-                                            'PENDING REVIEW',
-                                            style: TextStyle(
-                                              color: AppTheme.warmOchre,
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w800,
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Container(
+                                                width: 6,
+                                                height: 6,
+                                                decoration: const BoxDecoration(
+                                                  color: AppTheme.warmOchre,
+                                                  shape: BoxShape.circle,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 5),
+                                              const Text(
+                                                'NEEDS REVIEW',
+                                                style: TextStyle(
+                                                  color: AppTheme.warmOchre,
+                                                  fontSize: 9.5,
+                                                  fontWeight: FontWeight.w800,
+                                                  letterSpacing: 0.3,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+
+                                    const SizedBox(height: 12),
+
+                                    // Key High-level Pills (No heavy paragraphs)
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                                          decoration: BoxDecoration(
+                                            color: AppTheme.backgroundIceBlue,
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: const [
+                                              Icon(Icons.description_outlined, size: 13, color: AppTheme.ceruleanBlue),
+                                              SizedBox(width: 5),
+                                              Text(
+                                                'Legal Dossier Submitted',
+                                                style: TextStyle(
+                                                  color: AppTheme.textSlateNavy,
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Flexible(
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                                            decoration: BoxDecoration(
+                                              color: AppTheme.backgroundIceBlue,
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: const [
+                                                Icon(Icons.verified_user_outlined, size: 13, color: AppTheme.warmOchre),
+                                                SizedBox(width: 5),
+                                                Flexible(
+                                                  child: Text(
+                                                    'Pending Clearance',
+                                                    style: TextStyle(
+                                                      color: AppTheme.textSlateNavy,
+                                                      fontSize: 11,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         ),
                                       ],
                                     ),
-                                    if (ngo.missionStatement.isNotEmpty) ...[
-                                      const SizedBox(height: 10),
-                                      Text(
-                                        ngo.missionStatement,
-                                        style: const TextStyle(color: AppTheme.textSlateNavy, fontSize: 12),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      children: [
-                                        if (ngo.contactEmail.isNotEmpty) ...[
-                                          const Icon(Icons.email_outlined, size: 13, color: AppTheme.textMutedGray),
-                                          const SizedBox(width: 4),
-                                          Flexible(
-                                            child: Text(
-                                              ngo.contactEmail,
-                                              style: const TextStyle(color: AppTheme.textMutedGray, fontSize: 11),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 10),
-                                        ],
-                                        if (ngo.contactPhone.isNotEmpty) ...[
-                                          const Icon(Icons.phone_outlined, size: 13, color: AppTheme.textMutedGray),
-                                          const SizedBox(width: 4),
-                                          Flexible(
-                                            child: Text(
-                                              ngo.contactPhone,
-                                              style: const TextStyle(color: AppTheme.textMutedGray, fontSize: 11),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
+
                                     const Spacer(),
                                     const Divider(color: AppTheme.cardOutline, height: 1),
                                     const SizedBox(height: 8),
+
+                                    // Clean Bottom Action Bar
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
+                                        const Expanded(
+                                          child: Text(
+                                            'Tap to inspect dossier & approve',
+                                            style: TextStyle(
+                                              color: AppTheme.textMutedGray,
+                                              fontSize: 11,
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
                                         Row(
-                                          children: [
-                                            const Icon(Icons.folder_open_rounded, size: 14, color: AppTheme.ceruleanBlue),
-                                            const SizedBox(width: 4),
-                                            const Text(
-                                              'Review Dossier',
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: const [
+                                            Text(
+                                              'Review NGO',
                                               style: TextStyle(
                                                 color: AppTheme.ceruleanBlue,
-                                                fontSize: 11,
+                                                fontSize: 12,
                                                 fontWeight: FontWeight.w700,
                                               ),
                                             ),
+                                            SizedBox(width: 4),
+                                            Icon(Icons.arrow_forward_rounded, size: 14, color: AppTheme.ceruleanBlue),
                                           ],
-                                        ),
-                                        OutlinedButton.icon(
-                                          style: OutlinedButton.styleFrom(
-                                            foregroundColor: AppTheme.ceruleanBlue,
-                                            side: const BorderSide(color: AppTheme.ceruleanBlue),
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                            minimumSize: const Size(0, 34),
-                                          ),
-                                          icon: const Icon(Icons.arrow_forward_rounded, size: 14),
-                                          label: const Text('Inspect & Review', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-                                          onPressed: () {
-                                            context.push(
-                                              '/admin/ngo-review/${ngo.id}',
-                                              extra: ngo,
-                                            ).then((_) => _loadAdminData());
-                                          },
                                         ),
                                       ],
                                     ),
@@ -642,7 +677,7 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               SizedBox(
-                                height: 290,
+                                height: 220,
                                 child: PageView.builder(
                                   controller: _poolCarouselController,
                                   itemCount: displayPools.length,
@@ -707,6 +742,7 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
       activeCurrency: currency,
     );
     final progress = currency == AppCurrency.usd ? pool.progressRatioUsd : pool.progressRatioCdf;
+    final progressPercent = (progress * 100).clamp(0, 100).toInt();
 
     return GestureDetector(
       onTap: () {
@@ -717,28 +753,27 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
       },
       child: Container(
         margin: const EdgeInsets.only(right: 12, bottom: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppTheme.surfacePureWhite,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppTheme.cardOutline),
+          border: Border.all(color: AppTheme.cardOutline, width: 1.2),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top Row: Icon, Title, and Badges
+            // Top Row: Hub Icon + Title/Location + Category Pill
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(9),
                   decoration: const BoxDecoration(
                     color: AppTheme.pastelMint,
                     shape: BoxShape.circle,
@@ -746,10 +781,10 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                   child: const Icon(
                     Icons.hub_rounded,
                     color: AppTheme.mintGreen,
-                    size: 17,
+                    size: 19,
                   ),
                 ),
-                const SizedBox(width: 9),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -759,31 +794,16 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                         style: const TextStyle(
                           color: AppTheme.textSlateNavy,
                           fontWeight: FontWeight.w800,
-                          fontSize: 14,
-                          height: 1.2,
+                          fontSize: 15,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 2),
                       Row(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                            decoration: BoxDecoration(
-                              color: AppTheme.backgroundIceBlue,
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            child: Text(
-                              pool.category.toUpperCase(),
-                              style: const TextStyle(
-                                color: AppTheme.ceruleanBlue,
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 6),
+                          const Icon(Icons.location_on_outlined, size: 12, color: AppTheme.textMutedGray),
+                          const SizedBox(width: 2),
                           Expanded(
                             child: Text(
                               pool.location,
@@ -796,151 +816,163 @@ class _SuperAdminConsoleScreenState extends ConsumerState<SuperAdminConsoleScree
                     ],
                   ),
                 ),
-                const SizedBox(width: 6),
-                const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppTheme.textMutedGray),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                  decoration: BoxDecoration(
+                    color: AppTheme.powderBlue,
+                    borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                  ),
+                  child: Text(
+                    pool.category.toUpperCase(),
+                    style: const TextStyle(
+                      color: AppTheme.ceruleanBlue,
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
               ],
             ),
 
-            if (pool.subtitle.isNotEmpty) ...[
-              const SizedBox(height: 6),
-              Text(
-                pool.subtitle,
-                style: const TextStyle(color: AppTheme.textMutedGray, fontSize: 11, height: 1.25),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+            const SizedBox(height: 12),
 
-            const SizedBox(height: 7),
-
-            // Participating Campaigns Summary Box
+            // Middle: High-level Consortium Info Box (Clean capsule, NO cluttered split chips)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: AppTheme.backgroundIceBlue,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.groups_rounded, size: 13, color: AppTheme.ceruleanBlue),
-                          const SizedBox(width: 5),
-                          Text(
-                            '${pool.splits.length} Participating Beneficiaries',
-                            style: const TextStyle(
-                              color: AppTheme.textSlateNavy,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Text(
-                        'Formula Split',
-                        style: TextStyle(color: AppTheme.textMutedGray, fontSize: 9.5, fontWeight: FontWeight.w600),
+                      const Icon(Icons.groups_rounded, size: 15, color: AppTheme.ceruleanBlue),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${pool.splits.length} Participating NGOs',
+                        style: const TextStyle(
+                          color: AppTheme.textSlateNavy,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  Wrap(
-                    spacing: 5,
-                    runSpacing: 3,
-                    children: [
-                      ...pool.splits.take(3).map((s) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                          decoration: BoxDecoration(
-                            color: AppTheme.surfacePureWhite,
-                            borderRadius: BorderRadius.circular(5),
-                            border: Border.all(color: AppTheme.cardOutline),
-                          ),
-                          child: Text(
-                            '${s.ngoName} (${s.percentage.toInt()}%)',
-                            style: const TextStyle(
-                              color: AppTheme.textSlateNavy,
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        );
-                      }),
-                      if (pool.splits.length > 3)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                          decoration: BoxDecoration(
-                            color: AppTheme.surfacePureWhite,
-                            borderRadius: BorderRadius.circular(5),
-                            border: Border.all(color: AppTheme.cardOutline),
-                          ),
-                          child: Text(
-                            '+${pool.splits.length - 3} more',
-                            style: const TextStyle(
-                              color: AppTheme.ceruleanBlue,
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
+                  Row(
+                    children: const [
+                      Icon(Icons.tune_rounded, size: 13, color: AppTheme.mintGreen),
+                      SizedBox(width: 4),
+                      Text(
+                        'Formula Split',
+                        style: TextStyle(
+                          color: AppTheme.textMutedGray,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
                         ),
+                      ),
                     ],
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
 
-            // Progress Bar & Financials
+            // Financial Metrics & Linear Progress Indicator
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Raised: $raisedStr',
-                  style: const TextStyle(
-                    color: AppTheme.textSlateNavy,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 12,
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: raisedStr,
+                          style: const TextStyle(
+                            color: AppTheme.textSlateNavy,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13.5,
+                          ),
+                        ),
+                        TextSpan(
+                          text: ' raised of $targetStr',
+                          style: const TextStyle(
+                            color: AppTheme.textMutedGray,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Text(
-                  'Goal: $targetStr',
-                  style: const TextStyle(color: AppTheme.textMutedGray, fontSize: 11),
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppTheme.pastelMint,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '$progressPercent%',
+                    style: const TextStyle(
+                      color: AppTheme.mintGreen,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 11,
+                    ),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
                 value: progress,
                 backgroundColor: AppTheme.cardOutline,
                 valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.ceruleanBlue),
-                minHeight: 4,
+                minHeight: 6,
               ),
             ),
 
             const Spacer(),
             const Divider(color: AppTheme.cardOutline, height: 1),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
 
             // Bottom Tap Prompt
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: const [
-                Text(
-                  'Manage Pool & Sliders',
-                  style: TextStyle(
-                    color: AppTheme.ceruleanBlue,
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w700,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Tap to view details & adjust sliders',
+                    style: TextStyle(
+                      color: AppTheme.textMutedGray,
+                      fontSize: 11,
+                      fontStyle: FontStyle.italic,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                SizedBox(width: 4),
-                Icon(Icons.arrow_forward_rounded, size: 13, color: AppTheme.ceruleanBlue),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Text(
+                      'Redistribution',
+                      style: TextStyle(
+                        color: AppTheme.ceruleanBlue,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(width: 4),
+                    Icon(Icons.arrow_forward_rounded, size: 14, color: AppTheme.ceruleanBlue),
+                  ],
+                ),
               ],
             ),
           ],
